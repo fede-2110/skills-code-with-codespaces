@@ -73,7 +73,3 @@ router
       res.json(comment);
     });
   })
-
-  // update the comment with this id
-  .put((req, res) => {
-    Comment.findById
