@@ -1,75 +1,27 @@
-// create web server with express
+// Create web server and listen for requests
+// 1. get all comments
+// 2. get comment by id
+// 3. create a new comment
+// 4. update a comment by id
+// 5. delete a comment by id
+
 const express = require('express');
-const bodyParser = require('body-parser');
-const morgan = require('morgan');
-const mongoose = require('mongoose');
-const Comment = require('./models/comment');
-const app = express();
+const router = express.Router();
+const { getComments, getCommentById, createComment, updateComment, deleteComment } = require('../controllers/comments');
 
-// connect to database
-mongoose.connect('mongodb://localhost/comments');
+// 1. get all comments
+router.get('/', getComments);
 
-// configure app
-app.use(morgan('dev')); // log requests to the console
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+// 2. get comment by id
+router.get('/:id', getCommentById);
 
-const port = process.env.PORT || 8080; // set our port
+// 3. create a new comment
+router.post('/', createComment);
 
-// ROUTES FOR OUR API
-// =============================================================================
-const router = express.Router(); // get an instance of the express Router
+// 4. update a comment by id
+router.patch('/:id', updateComment);
 
-// middleware to use for all requests
-router.use((req, res, next) => {
-  // do logging
-  console.log('Something is happening.');
-  next();
-});
+// 5. delete a comment by id
+router.delete('/:id', deleteComment);
 
-// test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-router.get('/', (req, res) => {
-  res.json({ message: 'hooray! welcome to our api!' });
-});
-
-// on routes that end in /comments
-// ----------------------------------------------------
-router
-  .route('/comments')
-
-  // create a comment (accessed at POST http://localhost:8080/comments)
-  .post((req, res) => {
-    const comment = new Comment(); // create a new instance of the Comment model
-    comment.author = req.body.author;
-    comment.text = req.body.text;
-
-    // save the comment and check for errors
-    comment.save((err) => {
-      if (err) res.send(err);
-
-      res.json({ message: 'Comment created!' });
-    });
-  })
-
-  // get all the comments (accessed at GET http://localhost:8080/api/comments)
-  .get((req, res) => {
-    Comment.find((err, comments) => {
-      if (err) res.send(err);
-
-      res.json(comments);
-    });
-  });
-
-// on routes that end in /comments/:comment_id
-// ----------------------------------------------------
-router
-  .route('/comments/:comment_id')
-
-  // get the comment with that id
-  .get((req, res) => {
-    Comment.findById(req.params.comment_id, (err, comment) => {
-      if (err) res.send(err);
-
-      res.json(comment);
-    });
-  })
+module.exports = router;
